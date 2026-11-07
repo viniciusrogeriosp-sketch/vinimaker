@@ -30,7 +30,7 @@ Tudo no plano grátis. O Claude te guia em cada tela.
 3. Em **Environment variables** (Variáveis de ambiente), adicione:
    - `DROPBOX_APP_KEY` = o App key do Dropbox
    - `DROPBOX_APP_SECRET` = o App secret do Dropbox
-   - (só se a pasta do evento não for "Fotos Beach Tênis") `DROPBOX_PASTA` = caminho da pasta, ex.: `/Fotos Beach Tênis/Hípica`
+   - (só se a pasta do evento não for "Fotos Beach Tênis") `DROPBOX_PASTA` = caminho da pasta, ex.: `/Hípica - Beach Tênnis 7 e 8`
 4. Clique em **Deploy** (Publicar). Isso **não mexe** na página 3D (vinimaker.netlify.app); é um site separado.
 
 ## 4. Ligar o Dropbox na página
