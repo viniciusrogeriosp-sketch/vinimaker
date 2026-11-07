@@ -76,7 +76,22 @@ function render(){
   <footer><b>VINIMAKER Audiovisual</b><br>Sua marca ou evento quer uma cobertura assim? <a href="${IG}" style="color:var(--fg)">Fale com a gente no direct</a>.</footer>`;
   const g = document.getElementById("grid");
   if (!fotos.length) g.outerHTML = `<p class="load">As primeiras fotos ainda estão chegando. Volte daqui a pouco e toque em “Atualizar fotos”.</p>`;
+  const dias = [...new Set(fotos.map((f) => f.d))];
+  if (g && dias.length > 1) {
+    const nav = document.createElement("div");
+    nav.className = "bar"; nav.style.padding = "0 16px 14px"; nav.style.maxWidth = "1100px"; nav.style.margin = "0 auto";
+    dias.forEach((d) => { const b = document.createElement("button"); b.className = "btn out"; b.textContent = d || "Outras"; b.onclick = () => document.getElementById("dia-" + dias.indexOf(d)).scrollIntoView({ behavior: "smooth" }); nav.appendChild(b); });
+    g.before(nav);
+  }
+  let diaAtual = null;
   fotos.forEach((f, i) => {
+    if (g && dias.length > 1 && f.d !== diaAtual) {
+      diaAtual = f.d;
+      const h = document.createElement("h2");
+      h.id = "dia-" + dias.indexOf(f.d); h.textContent = f.d || "Outras";
+      h.style.cssText = "grid-column:1/-1;font-weight:800;font-size:22px;margin:18px 0 6px";
+      g.appendChild(h);
+    }
     const a = document.createElement("a");
     a.href = alta(f.p);
     a.onclick = (e) => { e.preventDefault(); abrir(i); };
@@ -106,7 +121,8 @@ async function carregar(){
     if (!d.ok) return d.motivo === "erro"
       ? (app.innerHTML = `<p class="load">Não consegui carregar agora. Tente de novo em instantes.</p>`)
       : bloqueado(d.motivo);
-    fotos = d.fotos; render();
+    const ordem = (x) => (/s[aá]b/i.test(x) ? "0" : /dom/i.test(x) ? "1" : "2") + x;
+    fotos = d.fotos.sort((a, b) => (ordem(a.d) === ordem(b.d) ? 0 : ordem(a.d) < ordem(b.d) ? -1 : 1)); render();
   } catch { app.innerHTML = `<p class="load">Sem conexão. Tente de novo em instantes.</p>`; }
 }
 carregar();

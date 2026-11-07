@@ -8,7 +8,7 @@ export default async (req) => {
   if (!a.ok) return json({ ok: false, motivo: a.motivo }, 403, h);
   try {
     const fotos = await listarFotos();
-    return json({ ok: true, fotos: fotos.map((f) => ({ p: f.p, n: f.n })) }, 200, h);
+    return json({ ok: true, fotos: fotos.map((f) => ({ p: f.p, n: f.n, d: f.d })) }, 200, h);
   } catch (e) {
     console.error(e);
     return json({ ok: false, motivo: "erro" }, 500, h);
