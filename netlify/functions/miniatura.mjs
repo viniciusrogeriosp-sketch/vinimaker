@@ -1,5 +1,5 @@
 // GET /api/miniatura?id=123&p=/caminho/foto.jpg -> imagem pequena
-import { liberarAcesso, caminhoPermitido, miniatura } from "../../lib/core.mjs";
+import { liberarAcesso, caminhoPermitido, miniatura, linkTemporario } from "../../lib/core.mjs";
 
 export default async (req) => {
   const u = new URL(req.url);
@@ -14,8 +14,15 @@ export default async (req) => {
       headers: { "content-type": "image/jpeg", "cache-control": "private, max-age=86400" },
     });
   } catch (e) {
-    console.error(e);
-    return new Response("erro", { status: 502 });
+    console.error("miniatura falhou", p, String(e && e.message || e));
+    // Se a miniatura falhar, mostra a foto original (link temporário do Dropbox).
+    try {
+      const link = await linkTemporario(p);
+      return new Response(null, { status: 302, headers: { location: link, "cache-control": "no-store" } });
+    } catch (e2) {
+      console.error("link temporario falhou", p, String(e2 && e2.message || e2));
+      return new Response("erro: " + String(e2 && e2.message || e2).slice(0, 300), { status: 502 });
+    }
   }
 };
 
