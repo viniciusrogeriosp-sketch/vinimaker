@@ -1,2 +1,4 @@
 node_modules
 .netlify
+node_modules
+.wrangler

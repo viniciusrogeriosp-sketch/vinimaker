@@ -53,8 +53,23 @@ const IG = "https://ig.me/m/vinimakeraudiovisual";
 const id = (location.pathname.match(/\/f\/([0-9]+)/) || [])[1] || "";
 const app = document.getElementById("app");
 let fotos = [], atual = 0;
-const mini = (p) => `/api/miniatura?id=${id}&p=${encodeURIComponent(p)}`;
-const alta = (p) => `/api/foto?id=${id}&p=${encodeURIComponent(p)}`;
+const mini = (f) => `/api/miniatura?id=${id}&i=${encodeURIComponent(f.i)}`;
+const grande = (f) => mini(f) + "&g=1";
+const alta = (f) => `/api/foto?id=${id}&i=${encodeURIComponent(f.i)}`;
+// Miniaturas pedidas em lotes de 25 (uma chamada só ao servidor).
+const fila = new Map(); let timer = null;
+const obs = new IntersectionObserver((es) => es.forEach((e) => {
+  if (!e.isIntersecting) return; obs.unobserve(e.target);
+  fila.set(e.target.dataset.i, e.target); if (!timer) timer = setTimeout(lote, 120);
+}), { rootMargin: "400px" });
+async function lote(){
+  timer = null;
+  const parte = [...fila.entries()].slice(0, 25); parte.forEach(([k]) => fila.delete(k));
+  if (fila.size) timer = setTimeout(lote, 50);
+  let m = {};
+  try { const r = await fetch(`/api/miniaturas?id=${id}&f=${parte.map(([k]) => encodeURIComponent(k)).join(",")}`); m = (await r.json()).m || {}; } catch {}
+  parte.forEach(([k, im]) => { im.src = m[k] ? "data:image/jpeg;base64," + m[k] : `/api/miniatura?id=${id}&i=${encodeURIComponent(k)}`; });
+}
 
 function bloqueado(motivo){
   const repassado = motivo === "repassado";
@@ -93,10 +108,10 @@ function render(){
       g.appendChild(h);
     }
     const a = document.createElement("a");
-    a.href = alta(f.p);
+    a.href = alta(f);
     a.onclick = (e) => { e.preventDefault(); abrir(i); };
     const im = new Image();
-    im.loading = "lazy"; im.alt = f.n; im.src = mini(f.p);
+    im.alt = f.n; im.dataset.i = f.i; obs.observe(im);
     im.onload = () => im.classList.add("ok");
     a.appendChild(im); g && g.appendChild(a);
   });
@@ -106,8 +121,8 @@ function render(){
 function abrir(i){
   atual = (i + fotos.length) % fotos.length;
   const f = fotos[atual];
-  document.getElementById("lbimg").src = mini(f.p);
-  document.getElementById("lbdl").href = alta(f.p);
+  document.getElementById("lbimg").src = grande(f);
+  document.getElementById("lbdl").href = alta(f);
   document.getElementById("lb").classList.add("on");
 }
 document.getElementById("lbx").onclick = () => document.getElementById("lb").classList.remove("on");
