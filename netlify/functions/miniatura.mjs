@@ -11,7 +11,7 @@ export default async (req) => {
   try {
     const img = await miniatura(p);
     return new Response(img, {
-      headers: { "content-type": "image/jpeg", "cache-control": "private, max-age=86400" },
+      headers: { "content-type": "image/jpeg", "cache-control": "private, max-age=604800, immutable" },
     });
   } catch (e) {
     console.error("miniatura falhou", p, String(e && e.message || e));
